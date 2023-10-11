@@ -1158,8 +1158,8 @@
             await execCargoFromFleetToStarbase(userFleets[i], currentSduCnt.account.data.parsed.info.tokenAmount.uiAmount);
 			await wait(5000);
 			
-			 fleetCurrentCargo = await getParsedTokenAccountsByOwner(userFleets[i].cargoHold, {programId: new solanaWeb3.PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA')});
-			 currentSduCnt = fleetCurrentCargo.value.find(item => item.pubkey.toString() === userFleets[i].sduToken.toString())
+			fleetCurrentCargo = await getParsedTokenAccountsByOwner(userFleets[i].cargoHold, {programId: new solanaWeb3.PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA')});
+			currentSduCnt = fleetCurrentCargo.value.find(item => item.pubkey.toString() === userFleets[i].sduToken.toString())
 			console.log('CurrentSDU');
 			console.log(currentSduCnt);
 			if(!currentSduCnt){
