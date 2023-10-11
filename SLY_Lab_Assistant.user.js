@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SAGE Lab Assistant
 // @namespace    http://tampermonkey.net/
-// @version      0.2.3
+// @version      0.2.4
 // @description  try to take over the world!
 // @author       SLY
 // @match        https://labs.staratlas.com/
@@ -1185,8 +1185,8 @@
 		
 		await wait(5000);
 		
-		var fleetCurrentCargo = await getParsedTokenAccountsByOwner(userFleets[i].cargoHold, {programId: new solanaWeb3.PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA')});
-		var currentToolCnt = fleetCurrentCargo.value.find(item => item.pubkey.toString() === userFleets[i].repairKitToken.toString());
+		fleetCurrentCargo = await getParsedTokenAccountsByOwner(userFleets[i].cargoHold, {programId: new solanaWeb3.PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA')});
+		currentToolCnt = fleetCurrentCargo.value.find(item => item.pubkey.toString() === userFleets[i].repairKitToken.toString());
 		console.log(currentToolCnt);
 		if(currentToolCnt.account.data.parsed.info.tokenAmount.uiAmount >= userFleets[i].cargoCapacity){
 			break;
@@ -1204,8 +1204,8 @@
         await execCargoFromStarbaseToFleet(userFleets[i], userFleets[i].fuelTank, userFleets[i].fuelToken, 'fueL3hBZjLLLJHiFH9cqZoozTG3XQZ53diwFPwbzNim', fuelCargoTypeAcct, userFleets[i].fuelCapacity - currentFuelCnt.account.data.parsed.info.tokenAmount.uiAmount);
 		
 		await wait(5000);
-		var fleetCurrentFuel = await getParsedTokenAccountsByOwner(userFleets[i].fuelTank, {programId: new solanaWeb3.PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA')});
-        var currentFuelCnt = fleetCurrentFuel.value.find(item => item.pubkey.toString() === userFleets[i].fuelToken.toString())
+		fleetCurrentFuel = await getParsedTokenAccountsByOwner(userFleets[i].fuelTank, {programId: new solanaWeb3.PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA')});
+        currentFuelCnt = fleetCurrentFuel.value.find(item => item.pubkey.toString() === userFleets[i].fuelToken.toString())
 		
 		if(currentFuelCnt.account.data.parsed.info.tokenAmount.uiAmount >= userFleets[i].fuelCapacity){
 			
