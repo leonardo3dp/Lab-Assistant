@@ -6,9 +6,9 @@
 // @author       SLY
 // @match        https://labs.staratlas.com/
 // @require      https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js
-// @require      https://raw.githubusercontent.com/ImGroovin/SAGE-Lab-Assistant/main/anchor-browserified.js
-// @require      https://raw.githubusercontent.com/ImGroovin/SAGE-Lab-Assistant/main/buffer-browserified.js
-// @require      https://raw.githubusercontent.com/ImGroovin/SAGE-Lab-Assistant/main/bs58-browserified.js
+// @require      https://raw.githubusercontent.com/ImGroovin/Lab-Assistant/main/anchor-browserified.js
+// @require      https://raw.githubusercontent.com/ImGroovin/Lab-Assistant/main/buffer-browserified.js
+// @require      https://raw.githubusercontent.com/ImGroovin/Lab-Assistant/main/bs58-browserified.js
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=staratlas.com
 // @grant        GM_setValue
 // @grant        GM_getValue
@@ -370,7 +370,7 @@
         });
     }
 
-    function waitForTxConfirmation(txHash) {
+    async function waitForTxConfirmation(txHash) {
         return new Promise(async resolve => {
             let response = null;
             try {
@@ -399,7 +399,7 @@
         });
     }
 
-    function txSignAndSend(ix) {
+    async function txSignAndSend(ix) {
         return new Promise(async resolve => {
             let tx = new solanaWeb3.Transaction();
             console.log('---INSTRUCTION---');
@@ -424,10 +424,11 @@
             console.log('---CONFIRMATION---');
             console.log(confirmation);
             let txResult = await solanaConnection.getTransaction(txHash, {commitment: 'confirmed', preflightCommitment: 'confirmed', maxSupportedTransactionVersion: 1})
-            if (!txResult) {
+            if (!txResult || txResult.meta.err != null) {
                 console.log('-----------------Transaction failed.-----------------');
                 if (confirmation.name == 'TransactionExpiredBlockheightExceededError') {
                     console.log('RETRY');
+					await wait(2000);
                     txResult = await txSignAndSend(ix);
                 }
             }
@@ -924,21 +925,39 @@
     function updateAssistStatus(fleet) {
         let targetRow = document.querySelectorAll('#assistStatus .assist-fleet-row[pk="' + fleet.publicKey.toString() + '"]');
         if (targetRow.length > 0) {
-            targetRow[0].children[1].firstChild.innerHTML = fleet.state;
+			targetRow[0].children[1].firstChild.innerHTML = fleet.toolCnt;
+			targetRow[0].children[2].firstChild.innerHTML = fleet.sduCnt;
+            targetRow[0].children[3].firstChild.innerHTML = fleet.state;
         } else {
             let fleetRow = document.createElement('tr');
             fleetRow.classList.add('assist-fleet-row');
             fleetRow.setAttribute('pk', fleet.publicKey.toString());
+			
+			//label
             let fleetLabel = document.createElement('span');
             fleetLabel.innerHTML = fleet.label;
             let fleetLabelTd = document.createElement('td');
             fleetLabelTd.appendChild(fleetLabel);
+			//tolkit
+			let tolkitLabel = document.createElement('span');
+            tolkitLabel.innerHTML = fleet.toolCnt;
+            let tolkitLabelTd = document.createElement('td');
+            tolkitLabelTd.appendChild(tolkitLabel);
+			//sdus
+			let sdusLabel = document.createElement('span');
+            sdusLabel.innerHTML = fleet.sduCnt;
+            let sdusLabelTd = document.createElement('td');
+            sdusLabelTd.appendChild(sdusLabel);
+			//status
             let fleetStatus = document.createElement('span');
             fleetStatus.innerHTML = fleet.state;
             let fleetStatusTd = document.createElement('td');
             fleetStatusTd.appendChild(fleetStatus);
-            fleetRow.appendChild(fleetLabelTd);
-            fleetRow.appendChild(fleetStatusTd);
+			
+            fleetRow.appendChild(fleetLabelTd); //label
+			fleetRow.appendChild(tolkitLabelTd); //tolkit
+			fleetRow.appendChild(sdusLabelTd); //Sdus
+            fleetRow.appendChild(fleetStatusTd); //status
             let targetElem = document.querySelector('#assistStatus .assist-modal-body table');
             targetElem.appendChild(fleetRow);
         }
@@ -962,7 +981,8 @@
             let moveType = 'warp';
             let moveDist = calculateMovementDistance([starbaseX,starbaseY], [destX,destY]);
             if (moveDist > userFleets[userFleetIndex].maxWarpDistance / 100) {
-                let subwarpCost = calculateSubwarpFuelBurn(userFleets[userFleetIndex], moveDist);
+				 moveType = 'subwarp'; //leovicio
+                /*let subwarpCost = calculateSubwarpFuelBurn(userFleets[userFleetIndex], moveDist);
                 if (subwarpCost * 2 > userFleets[userFleetIndex].fuelCapacity) {
                     console.log('ERROR: fleet will not have enough fuel to return to starbase');
                     row.children[4].firstChild.style.border = '2px solid red';
@@ -972,7 +992,7 @@
                     errBool = true;
                 } else {
                     moveType = 'subwarp';
-                }
+                }*/
             }
             if (moveType != 'error') {
                 await GM.setValue(fleetPK, `{\"name\": \"${fleetName}\", \"scan\": \"${fleetScan}\", \"dest\": \"${fleetDestCoord}\", \"starbase\": \"${fleetStarbaseCoord}\", \"moveType\": \"${moveType}\"}`);
@@ -1042,13 +1062,14 @@
     }
 
     async function handleScan(i) {
-        let destX = parseInt(userFleets[i].destCoord.split(',')[0].trim());
+       /*  let destX = parseInt(userFleets[i].destCoord.split(',')[0].trim());
         let destY = parseInt(userFleets[i].destCoord.split(',')[1].trim());
-        if (userFleets[i].startingCoords[0] !== destX && userFleets[i].startingCoords[1] !== destY) {
+       if (userFleets[i].startingCoords[0] !== destX && userFleets[i].startingCoords[1] !== destY) {
+			userFleets[i].state = 'Moving';
             let moveDist = calculateMovementDistance([userFleets[i].startingCoords[0],userFleets[i].startingCoords[1]], [destX,destY]);
             let warpCooldownFinished = await handleMovement(i, moveDist, destX, destY);
             console.log('Movement finished');
-        }
+        }*/
         userFleets[i].state = 'Scanning';
         updateAssistStatus(userFleets[i]);
         let scanTimer = userFleets[i].scanCooldown;
@@ -1141,11 +1162,11 @@
                 } catch (err) {
                     console.log('ERROR: ', err);
                 }
-                await wait(1000);
+                await wait(5000);
                 updateAssistStatus(userFleets[i]);
             }
             console.log('Iter: ', iterCnt);
-            setTimeout(startAssistant, 62000);
+            setTimeout(startAssistant, 100);
             iterCnt++;
         };
     }
@@ -1181,7 +1202,7 @@
             assistStatus.style.display = 'none';
             let assistStatusContent = document.createElement('div');
             assistStatusContent.classList.add('assist-status-content');
-            assistStatusContent.innerHTML = '<div class="assist-modal-header">Status<div class="assist-modal-header-right"><span class="assist-modal-close">x</span></div></div><div class="assist-modal-body"><table><tr><td>Fleet</td><td>State</td></tr></table></div>'
+            assistStatusContent.innerHTML = '<div class="assist-modal-header">Status<div class="assist-modal-header-right"><span class="assist-modal-close">x</span></div></div><div class="assist-modal-body"><table><tr><td>Fleet</td><td>Toolkits</td><td>SDUS</td><td>State</td></tr></table></div>'
             assistStatus.append(assistStatusContent);
             let autoContainer = document.createElement('div');
             autoContainer.style.display = 'flex';
@@ -1244,5 +1265,5 @@
     //execScan(userFleets[0]);
     //execWarp(userFleets[0]);
     //execExitWarp(userFleets[0]);
-
+	
 })();
