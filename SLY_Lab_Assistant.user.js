@@ -1103,7 +1103,7 @@
         let scanResult = await execScan(userFleets[i]);
         console.log('Scan Result: ', scanResult);
         let changesSDU = scanResult ? getBalanceChange(scanResult, userFleets[i].sduToken.toString()) : {postBalance: userFleets[i].sduCnt, preBalance: userFleets[i].sduCnt};
-        let changesTool = scanResult ? getBalanceChange(scanResult, userFleets[i].repairKitToken.toString()) : {postBalance: userFleets[i].toolCnt - 10, preBalance: userFleets[i].toolCnt};
+        let changesTool = scanResult ? getBalanceChange(scanResult, userFleets[i].repairKitToken.toString()) : {postBalance: userFleets[i].toolCnt - 100, preBalance: userFleets[i].toolCnt};
         if (changesSDU.postBalance != changesSDU.preBalance) {
             console.log(`[${userFleets[i].label}] FOUND: ${changesSDU.postBalance - changesSDU.preBalance}`);
             scanTimer = 120;
