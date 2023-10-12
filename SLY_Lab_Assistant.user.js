@@ -1019,8 +1019,8 @@
     }
 
     function updateAssistStatus(fleet) {
-		let targetElem = document.querySelector('#assistStatus .assist-modal-body table');
-		if (typeof (targetElem) != 'undefined' && targetElem != null) {
+		let findelemet = document.querySelector('#assistStatus .assist-modal-body table');
+		if (typeof (findelemet) != 'undefined' && findelemet != null) {
         let targetRow = document.querySelectorAll('#assistStatus .assist-fleet-row[pk="' + fleet.publicKey.toString() + '"]');
         console.log('-----DEBUG-----');
         console.log(targetRow);
@@ -1055,6 +1055,7 @@
             fleetRow.appendChild(fleetToolTd);
             fleetRow.appendChild(fleetSduTd);
             fleetRow.appendChild(fleetStatusTd);
+			let targetElem = document.querySelector('#assistStatus .assist-modal-body table');
             targetElem.appendChild(targetElem);
         }
 	}
