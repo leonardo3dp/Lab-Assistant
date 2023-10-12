@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SAGE Lab Assistant
 // @namespace    http://tampermonkey.net/
-// @version      0.2.4
+// @version      0.2.5
 // @description  try to take over the world!
 // @author       SLY
 // @match        https://labs.staratlas.com/
@@ -1254,7 +1254,7 @@
                 try {
                     let fleetSavedData = await GM.getValue(userFleets[i].publicKey.toString(), '{}');
                     let fleetParsedData = JSON.parse(fleetSavedData);
-                    if (fleetParsedData.scan == 'true' && userFleets[i].toolCnt > 9 && userFleets[i].state === 'Idle') {
+                    if (fleetParsedData.scan == 'true' && userFleets[i].toolCnt > 99 && userFleets[i].state === 'Idle') {
                         console.log(`[${userFleets[i].label}] Scanning`);
                         handleScan(i);
                     } else if (fleetParsedData.scan == 'true' && userFleets[i].state === 'Idle') {
