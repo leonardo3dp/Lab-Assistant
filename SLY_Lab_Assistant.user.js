@@ -513,12 +513,19 @@
             console.log('---CONFIRMATION---');
             console.log(confirmation);
             let txResult = await solanaConnection.getTransaction(txHash, {commitment: 'confirmed', preflightCommitment: 'confirmed', maxSupportedTransactionVersion: 1})
-            if (!txResult || txResult.meta.err != null) {
-                console.log('-----------------Transaction failed.-----------------');
-                if (confirmation.name == 'TransactionExpiredBlockheightExceededError') {
-                    console.log('RETRY');
-                    txResult = await txSignAndSend(ix);
+            if (confirmation.name == 'TransactionExpiredBlockheightExceededError' && !txResult) {
+                console.log('-----RETRY-----');
+                txResult = await txSignAndSend(ix);
+            }
+	     if (!confirmation.name) {
+                while (!txResult) {
+                    await wait(2000);
+                    txResult = await solanaConnection.getTransaction(txHash, {commitment: 'confirmed', preflightCommitment: 'confirmed', maxSupportedTransactionVersion: 1});
                 }
+		if(txResult.meta.err != null){
+		    console.log('RETRY');
+                    txResult = await txSignAndSend(ix);
+		}
             }
             resolve(txResult);
         });
