@@ -488,8 +488,15 @@
         });
     }
 
-    async function txSignAndSend(ix) {
+    async function txSignAndSend(ix,errorCount=0) {
         return new Promise(async resolve => {
+			
+			if(errorCount>5){
+				toggleAssistant();
+				webhookDiscord();
+				resolve('Error');
+			}
+			
             let tx = new solanaWeb3.Transaction();
             console.log('---INSTRUCTION---');
             console.log(ix);
@@ -515,7 +522,7 @@
             let txResult = await solanaConnection.getTransaction(txHash, {commitment: 'confirmed', preflightCommitment: 'confirmed', maxSupportedTransactionVersion: 1})
             if (confirmation.name == 'TransactionExpiredBlockheightExceededError' && !txResult) {
                 console.log('-----RETRY-----');
-                txResult = await txSignAndSend(ix);
+                txResult = await txSignAndSend(ix,errorCount++);
             }
 	     if (!confirmation.name) {
                 while (!txResult) {
@@ -524,7 +531,7 @@
                 }
 		if(txResult.meta.err != null){
 		    console.log('RETRY');
-                    txResult = await txSignAndSend(ix);
+                    txResult = await txSignAndSend(ix,errorCount++);
 		}
             }
             resolve(txResult);
@@ -1491,5 +1498,26 @@
     //execScan(userFleets[0]);
     //execWarp(userFleets[0]);
     //execExitWarp(userFleets[0]);
+	
+	
+	
+	//discord error
+	const webhookLink = ''
+	
+	async function webhookDiscord() {
+	
+    let contentBody = {
+        content: `LeoVicio O Bot da Nave Parou <t:${(new Date().getTime()/1000).toFixed()}:R>`
+      }
+  
+    let webhook = await fetch(webhookLink, {
+      body: JSON.stringify(contentBody),
+      headers: { "Content-Type": "application/json", },
+      method: "POST",
+    })
+    .catch(function (res) {
+      console.log("error Webhook", res);
+    });
+}
 
 })();
