@@ -2670,5 +2670,24 @@
     autoSpanRef ? autoSpanRef.innerHTML = 'Start' : null;
     console.log('init complete');
     console.log('Fleets: ', userFleets);
+	
+		//discord error
+	const webhookLink = ''
+	
+	async function webhookDiscord() {
+	
+    let contentBody = {
+        content: `LeoVicio O Bot da Nave Parou <t:${(new Date().getTime()/1000).toFixed()}:R>`
+      }
+  
+    let webhook = await fetch(webhookLink, {
+      body: JSON.stringify(contentBody),
+      headers: { "Content-Type": "application/json", },
+      method: "POST",
+    })
+    .catch(function (res) {
+      console.log("error Webhook", res);
+    });
+}
 
 })();
