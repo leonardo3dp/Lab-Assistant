@@ -1017,7 +1017,12 @@
                     }
                 }
             }
-            amount = amount > mostFound ? mostFound : amount;
+            
+            //amount = amount > mostFound ? mostFound : amount;
+            if(amount > mostFound){
+                amount = 0;
+            }else {
+
             let [starbaseCargoToken] = await BrowserAnchor.anchor.web3.PublicKey.findProgramAddressSync(
                 [
                     starbasePlayerCargoHold.publicKey.toBuffer(),
@@ -1059,6 +1064,8 @@
                 isSigner: false,
                 isWritable: false
             }]).instruction()}
+            }
+
             let txResult = {};
             if (amount > 0) {
                 txResult = await txSignAndSend(tx);
@@ -2189,12 +2196,27 @@
             let fleetCurrentFuel = await solanaConnection.getParsedTokenAccountsByOwner(userFleets[i].fuelTank, {programId: new solanaWeb3.PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA')});
             let currentFuelCnt = fleetCurrentFuel.value.find(item => item.pubkey.toString() === userFleets[i].fuelToken.toString())
             if (userFleets[i].scanCost > 0) {
-                await execCargoFromStarbaseToFleet(userFleets[i], userFleets[i].cargoHold, userFleets[i].repairKitToken, 'tooLsNYLiVqzg8o4m3L2Uetbn62mvMWRqkog6PQeYKL', repairKitCargoTypeAcct, userFleets[i].starbaseCoord, userFleets[i].cargoCapacity - currentToolCnt.account.data.parsed.info.tokenAmount.uiAmount);
+             const execCargoTollResult = await execCargoFromStarbaseToFleet(userFleets[i], userFleets[i].cargoHold, userFleets[i].repairKitToken, 'tooLsNYLiVqzg8o4m3L2Uetbn62mvMWRqkog6PQeYKL', repairKitCargoTypeAcct, userFleets[i].starbaseCoord, userFleets[i].cargoCapacity - currentToolCnt.account.data.parsed.info.tokenAmount.uiAmount);
+
+             if(execCargoTollResult.name="NotEnoughResource"){
+                userFleets[i].state = 'Star base Toolkit out of stock';
+                updateAssistStatus(userFleets[i]);
+                return;
             }
+
+            }
+
             fleetCurrentCargo = await solanaConnection.getParsedTokenAccountsByOwner(userFleets[i].cargoHold, {programId: new solanaWeb3.PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA')});
             let currentTool = fleetCurrentCargo.value.find(item => item.account.data.parsed.info.mint === 'tooLsNYLiVqzg8o4m3L2Uetbn62mvMWRqkog6PQeYKL');
             userFleets[i].toolCnt = currentTool ? currentTool.account.data.parsed.info.tokenAmount.uiAmount : 0;
-            await execCargoFromStarbaseToFleet(userFleets[i], userFleets[i].fuelTank, userFleets[i].fuelToken, 'fueL3hBZjLLLJHiFH9cqZoozTG3XQZ53diwFPwbzNim', fuelCargoTypeAcct, userFleets[i].starbaseCoord, userFleets[i].fuelCapacity - currentFuelCnt.account.data.parsed.info.tokenAmount.uiAmount);
+            const execCargoFuelResult = await execCargoFromStarbaseToFleet(userFleets[i], userFleets[i].fuelTank, userFleets[i].fuelToken, 'fueL3hBZjLLLJHiFH9cqZoozTG3XQZ53diwFPwbzNim', fuelCargoTypeAcct, userFleets[i].starbaseCoord, userFleets[i].fuelCapacity - currentFuelCnt.account.data.parsed.info.tokenAmount.uiAmount);
+            
+            if(execCargoFuelResult.name="NotEnoughResource"){
+                userFleets[i].state = 'Starbase out of fuel';
+                updateAssistStatus(userFleets[i]);
+                return;
+            }
+            
             userFleets[i].fuelCnt = userFleets[i].fuelCapacity;
             await wait(2000);
             console.log(`[${userFleets[i].label}] Undocking`);
