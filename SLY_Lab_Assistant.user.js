@@ -1019,6 +1019,7 @@
             }
             
             //amount = amount > mostFound ? mostFound : amount;
+            let tx = {};
             if(amount > mostFound){
                 amount = 0;
             }else {
@@ -1032,7 +1033,7 @@
                 new solanaWeb3.PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL')
             );
             await solanaConnection.getAccountInfo(starbaseCargoToken) || await createProgramDerivedAccount(starbaseCargoToken, starbasePlayerCargoHold.publicKey, new solanaWeb3.PublicKey(tokenMint));
-            let tx = { instruction: await sageProgram.methods.depositCargoToFleet({ amount: new BrowserAnchor.anchor.BN(amount), keyIndex: 0 }).accountsStrict({
+             tx = { instruction: await sageProgram.methods.depositCargoToFleet({ amount: new BrowserAnchor.anchor.BN(amount), keyIndex: 0 }).accountsStrict({
                 gameAccountsFleetAndOwner: {
                     gameFleetAndOwner: {
                         fleetAndOwner: {
