@@ -1017,7 +1017,7 @@
                     }
                 }
             }
-            
+
             //amount = amount > mostFound ? mostFound : amount;
             let tx = {};
             if(amount > mostFound){
@@ -2199,7 +2199,7 @@
             if (userFleets[i].scanCost > 0) {
              const execCargoTollResult = await execCargoFromStarbaseToFleet(userFleets[i], userFleets[i].cargoHold, userFleets[i].repairKitToken, 'tooLsNYLiVqzg8o4m3L2Uetbn62mvMWRqkog6PQeYKL', repairKitCargoTypeAcct, userFleets[i].starbaseCoord, userFleets[i].cargoCapacity - currentToolCnt.account.data.parsed.info.tokenAmount.uiAmount);
 
-             if(execCargoTollResult.name="NotEnoughResource"){
+             if(execCargoTollResult.name=="NotEnoughResource"){
                 userFleets[i].state = 'Star base Toolkit out of stock';
                 updateAssistStatus(userFleets[i]);
                 return;
@@ -2211,13 +2211,13 @@
             let currentTool = fleetCurrentCargo.value.find(item => item.account.data.parsed.info.mint === 'tooLsNYLiVqzg8o4m3L2Uetbn62mvMWRqkog6PQeYKL');
             userFleets[i].toolCnt = currentTool ? currentTool.account.data.parsed.info.tokenAmount.uiAmount : 0;
             const execCargoFuelResult = await execCargoFromStarbaseToFleet(userFleets[i], userFleets[i].fuelTank, userFleets[i].fuelToken, 'fueL3hBZjLLLJHiFH9cqZoozTG3XQZ53diwFPwbzNim', fuelCargoTypeAcct, userFleets[i].starbaseCoord, userFleets[i].fuelCapacity - currentFuelCnt.account.data.parsed.info.tokenAmount.uiAmount);
-            
-            if(execCargoFuelResult.name="NotEnoughResource"){
+
+            if(execCargoFuelResult.name=="NotEnoughResource"){
                 userFleets[i].state = 'Starbase out of fuel';
                 updateAssistStatus(userFleets[i]);
                 return;
             }
-            
+
             userFleets[i].fuelCnt = userFleets[i].fuelCapacity;
             await wait(2000);
             console.log(`[${userFleets[i].label}] Undocking`);
